@@ -18,7 +18,7 @@ const Footer = () => {
       <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '40px' }}>
           <div>
-            <h3 style={{ marginBottom: '20px', color: 'var(--primary-light)' }}>AgriTools🌱</h3>
+            <img src="/LOGO-AGRI.png" alt="AgriTools Logo" style={{ height: '60px', objectFit: 'contain', marginBottom: '20px', filter: 'brightness(0) invert(1)' }} />
             <p style={{ color: '#ccc' }}>
               Especialistas em serviços de consultoria agrícola & avícola. Fornecemos os melhores equipamentos para o seu agronegócio crescer com sustentabilidade.
             </p>
