@@ -5,13 +5,23 @@ import heroBg from '../assets/hero-bg.png';
 import seedsImg from '../assets/seeds.png';
 import poultryImg from '../assets/poultry.png';
 import consultancyImg from '../assets/consultancy.png';
+import axios from 'axios';
+import { useState, useEffect } from 'react';
 
 const Home = () => {
-  const categories = [
-    { name: 'Sementes & Fertilizantes', img: seedsImg, path: '/shop?category=seeds' },
-    { name: 'Equipamentos Avícolas', img: poultryImg, path: '/shop?category=poultry' },
-    { name: 'Consultoria Técnica', img: consultancyImg, path: '/shop?category=consultancy' },
-  ];
+  const [specialties, setSpecialties] = useState([]);
+
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const { data } = await axios.get('/_/backend/api/specialties');
+        setSpecialties(data);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+      }
+    };
+    fetchSpecialties();
+  }, []);
 
   const features = [
     { icon: <Sprout size={40} />, title: 'Qualidade Superior', desc: 'Produtos certificados para garantir a melhor colheita.' },
@@ -59,7 +69,7 @@ const Home = () => {
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-            {categories.map((cat, i) => (
+            {specialties.map((cat, i) => (
               <motion.div
                 key={i}
                 whileHover={{ y: -10 }}
@@ -71,7 +81,7 @@ const Home = () => {
                   boxShadow: 'var(--shadow)'
                 }}
               >
-                <img src={cat.img} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 <div style={{
                   position: 'absolute',
                   inset: 0,

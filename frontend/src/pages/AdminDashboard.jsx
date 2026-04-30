@@ -1,31 +1,36 @@
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Plus, Edit, Trash, Package, ShoppingBag, Users, BarChart, X, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash, Package, ShoppingBag, Users, BarChart, X, Loader2, Star } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   
   const { user } = useContext(AuthContext);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    description: '',
-    category: 'Sementes',
-    stock: '',
-    images: ['']
+  const [productData, setProductData] = useState({
+    name: '', price: '', description: '', category: 'Sementes', stock: '', images: ['']
   });
 
-  const fetchProducts = async () => {
+  const [specialtyData, setSpecialtyData] = useState({
+    name: '', image: '', path: '/shop'
+  });
+
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/_/backend/api/products');
-      setProducts(data.products);
+      if (activeTab === 'products') {
+        const { data } = await axios.get('/_/backend/api/products');
+        setProducts(data.products);
+      } else if (activeTab === 'specialties') {
+        const { data } = await axios.get('/_/backend/api/specialties');
+        setSpecialties(data);
+      }
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -34,17 +39,18 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchData();
+  }, [activeTab]);
 
   const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+    if (window.confirm(`Tem certeza que deseja excluir este ${activeTab === 'products' ? 'produto' : 'especialidade'}?`)) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await axios.delete(`/_/backend/api/products/${id}`, config);
-        fetchProducts();
+        const endpoint = activeTab === 'products' ? `/api/products/${id}` : `/api/specialties/${id}`;
+        await axios.delete(`/_/backend${endpoint}`, config);
+        fetchData();
       } catch (error) {
-        alert('Erro ao excluir produto');
+        alert('Erro ao excluir item');
       }
     }
   };
@@ -53,34 +59,46 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      if (editingProduct) {
-        await axios.put(`/_/backend/api/products/${editingProduct._id}`, formData, config);
+      const isProduct = activeTab === 'products';
+      const endpoint = isProduct ? '/api/products' : '/api/specialties';
+      const data = isProduct ? productData : specialtyData;
+
+      if (editingItem) {
+        await axios.put(`/_/backend${endpoint}/${editingItem._id}`, data, config);
       } else {
-        await axios.post('/_/backend/api/products', formData, config);
+        await axios.post(`/_/backend${endpoint}`, data, config);
       }
+      
       setShowModal(false);
-      setEditingProduct(null);
-      setFormData({ name: '', price: '', description: '', category: 'Sementes', stock: '', images: [''] });
-      fetchProducts();
+      setEditingItem(null);
+      resetForms();
+      fetchData();
     } catch (error) {
-      alert('Erro ao salvar produto');
+      alert('Erro ao salvar item');
     }
   };
 
-  const openModal = (product = null) => {
-    if (product) {
-      setEditingProduct(product);
-      setFormData({
-        name: product.name,
-        price: product.price,
-        description: product.description,
-        category: product.category,
-        stock: product.stock,
-        images: product.images
-      });
+  const resetForms = () => {
+    setProductData({ name: '', price: '', description: '', category: 'Sementes', stock: '', images: [''] });
+    setSpecialtyData({ name: '', image: '', path: '/shop' });
+  };
+
+  const openModal = (item = null) => {
+    if (item) {
+      setEditingItem(item);
+      if (activeTab === 'products') {
+        setProductData({
+          name: item.name, price: item.price, description: item.description,
+          category: item.category, stock: item.stock, images: item.images
+        });
+      } else {
+        setSpecialtyData({
+          name: item.name, image: item.image, path: item.path
+        });
+      }
     } else {
-      setEditingProduct(null);
-      setFormData({ name: '', price: '', description: '', category: 'Sementes', stock: '', images: [''] });
+      setEditingItem(null);
+      resetForms();
     }
     setShowModal(true);
   };
@@ -104,11 +122,11 @@ const AdminDashboard = () => {
                 <button onClick={() => setActiveTab('products')} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', borderRadius: '10px', background: activeTab === 'products' ? 'var(--primary)' : 'transparent', color: activeTab === 'products' ? 'white' : 'var(--text-dark)', textAlign: 'left', fontWeight: 600 }}>
                   <Package size={20} /> Produtos
                 </button>
+                <button onClick={() => setActiveTab('specialties')} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', borderRadius: '10px', background: activeTab === 'specialties' ? 'var(--primary)' : 'transparent', color: activeTab === 'specialties' ? 'white' : 'var(--text-dark)', textAlign: 'left', fontWeight: 600 }}>
+                  <Star size={20} /> Especialidades
+                </button>
                 <button onClick={() => setActiveTab('orders')} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', borderRadius: '10px', background: activeTab === 'orders' ? 'var(--primary)' : 'transparent', color: activeTab === 'orders' ? 'white' : 'var(--text-dark)', textAlign: 'left', fontWeight: 600 }}>
                   <ShoppingBag size={20} /> Pedidos
-                </button>
-                <button onClick={() => setActiveTab('reports')} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px', borderRadius: '10px', background: activeTab === 'reports' ? 'var(--primary)' : 'transparent', color: activeTab === 'reports' ? 'white' : 'var(--text-dark)', textAlign: 'left', fontWeight: 600 }}>
-                  <BarChart size={20} /> Relatórios
                 </button>
               </nav>
             </div>
@@ -117,10 +135,10 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <main style={{ flexGrow: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-              <h2 style={{ fontSize: '2rem', textTransform: 'capitalize' }}>{activeTab}</h2>
-              {activeTab === 'products' && (
+              <h2 style={{ fontSize: '2rem', textTransform: 'capitalize' }}>{activeTab === 'specialties' ? 'Nossas Especialidades' : activeTab}</h2>
+              {(activeTab === 'products' || activeTab === 'specialties') && (
                 <button onClick={() => openModal()} className="btn btn-primary">
-                  <Plus size={20} /> Novo Produto
+                  <Plus size={20} /> Novo {activeTab === 'products' ? 'Produto' : 'Especialidade'}
                 </button>
               )}
             </div>
@@ -136,7 +154,6 @@ const AdminDashboard = () => {
                       <th style={{ padding: '15px', textAlign: 'left' }}>Nome</th>
                       <th style={{ padding: '15px', textAlign: 'left' }}>Preço</th>
                       <th style={{ padding: '15px', textAlign: 'left' }}>Categoria</th>
-                      <th style={{ padding: '15px', textAlign: 'left' }}>Stock</th>
                       <th style={{ padding: '15px', textAlign: 'center' }}>Ações</th>
                     </tr>
                   </thead>
@@ -147,11 +164,38 @@ const AdminDashboard = () => {
                         <td style={{ padding: '15px', fontWeight: 600 }}>{p.name}</td>
                         <td style={{ padding: '15px' }}>{p.price.toLocaleString('pt-MZ')} MT</td>
                         <td style={{ padding: '15px' }}><span style={{ padding: '5px 12px', borderRadius: '20px', backgroundColor: '#eef2ff', color: 'var(--primary)', fontSize: '0.8rem' }}>{p.category}</span></td>
-                        <td style={{ padding: '15px' }}>{p.stock}</td>
                         <td style={{ padding: '15px', textAlign: 'center' }}>
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                             <button onClick={() => openModal(p)} style={{ color: 'var(--primary)', background: 'none' }}><Edit size={18} /></button>
                             <button onClick={() => handleDelete(p._id)} style={{ color: '#ef4444', background: 'none' }}><Trash size={18} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : activeTab === 'specialties' ? (
+              <div className="glass" style={{ borderRadius: '20px', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ backgroundColor: '#f8f9fa' }}>
+                    <tr>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Imagem</th>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Nome</th>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Link</th>
+                      <th style={{ padding: '15px', textAlign: 'center' }}>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {specialties.map(s => (
+                      <tr key={s._id} style={{ borderTop: '1px solid #eee' }}>
+                        <td style={{ padding: '15px' }}><img src={s.image} style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '8px' }} /></td>
+                        <td style={{ padding: '15px', fontWeight: 600 }}>{s.name}</td>
+                        <td style={{ padding: '15px', color: '#666' }}>{s.path}</td>
+                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                            <button onClick={() => openModal(s)} style={{ color: 'var(--primary)', background: 'none' }}><Edit size={18} /></button>
+                            <button onClick={() => handleDelete(s._id)} style={{ color: '#ef4444', background: 'none' }}><Trash size={18} /></button>
                           </div>
                         </td>
                       </tr>
@@ -174,47 +218,58 @@ const AdminDashboard = () => {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div className="glass" style={{ width: '100%', maxWidth: '600px', backgroundColor: 'white', borderRadius: '20px', padding: '40px', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}>
             <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none' }}><X size={24} /></button>
-            <h2 style={{ marginBottom: '30px' }}>{editingProduct ? 'Editar Produto' : 'Adicionar Novo Produto'}</h2>
+            <h2 style={{ marginBottom: '30px' }}>{editingItem ? 'Editar' : 'Adicionar Novo'} {activeTab === 'products' ? 'Produto' : 'Especialidade'}</h2>
             
             <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Nome</label>
-                  <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Preço (MT)</label>
-                  <input type="number" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
-                </div>
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Categoria</label>
-                  <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }}>
-                    <option>Sementes</option>
-                    <option>Fertilizantes</option>
-                    <option>Ferramentas</option>
-                    <option>Máquinas</option>
-                    <option>Avicultura</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Stock</label>
-                  <input type="number" required value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Descrição</label>
-                <textarea rows="4" required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', fontFamily: 'inherit' }}></textarea>
-              </div>
-
-              <div style={{ marginBottom: '30px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>URL da Imagem</label>
-                <input type="text" required value={formData.images[0]} onChange={e => setFormData({...formData, images: [e.target.value]})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
-              </div>
-
+              {activeTab === 'products' ? (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Nome</label>
+                      <input type="text" required value={productData.name} onChange={e => setProductData({...productData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Preço (MT)</label>
+                      <input type="number" required value={productData.price} onChange={e => setProductData({...productData, price: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Categoria</label>
+                      <select value={productData.category} onChange={e => setProductData({...productData, category: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }}>
+                        <option>Sementes</option><option>Fertilizantes</option><option>Ferramentas</option><option>Máquinas</option><option>Avicultura</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Stock</label>
+                      <input type="number" required value={productData.stock} onChange={e => setProductData({...productData, stock: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Descrição</label>
+                    <textarea rows="4" required value={productData.description} onChange={e => setProductData({...productData, description: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd', fontFamily: 'inherit' }}></textarea>
+                  </div>
+                  <div style={{ marginBottom: '30px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>URL da Imagem</label>
+                    <input type="text" required value={productData.images[0]} onChange={e => setProductData({...productData, images: [e.target.value]})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Nome da Especialidade</label>
+                    <input type="text" required value={specialtyData.name} onChange={e => setSpecialtyData({...specialtyData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>URL da Imagem</label>
+                    <input type="text" required value={specialtyData.image} onChange={e => setSpecialtyData({...specialtyData, image: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                  </div>
+                  <div style={{ marginBottom: '30px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Link de Redirecionamento</label>
+                    <input type="text" required value={specialtyData.path} onChange={e => setSpecialtyData({...specialtyData, path: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }} />
+                  </div>
+                </>
+              )}
               <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '15px' }}>Salvar Alterações</button>
             </form>
           </div>

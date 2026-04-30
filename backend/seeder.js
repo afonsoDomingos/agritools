@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Product = require('./src/models/Product');
+const Specialty = require('./src/models/Specialty');
+const User = require('./src/models/User');
 
 dotenv.config();
 
@@ -69,10 +71,28 @@ const products = [
   }
 ];
 
+const specialties = [
+  { name: 'Sementes & Fertilizantes', image: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&q=80&w=800', path: '/shop?category=seeds' },
+  { name: 'Equipamentos Avícolas', image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&q=80&w=800', path: '/shop?category=poultry' },
+  { name: 'Consultoria Técnica', image: 'https://images.unsplash.com/photo-1590684183327-02456f176764?auto=format&fit=crop&q=80&w=800', path: '/shop?category=consultancy' },
+];
+
 const seedData = async () => {
   try {
     await Product.deleteMany();
+    await Specialty.deleteMany();
+    await User.deleteMany();
+
     await Product.insertMany(products);
+    await Specialty.insertMany(specialties);
+
+    await User.create({
+      name: 'Admin AgriTools',
+      email: 'admin@agritools.co.mz',
+      password: '@Admin123@',
+      role: 'admin'
+    });
+
     console.log('Data Imported Successfully!');
     process.exit();
   } catch (error) {
