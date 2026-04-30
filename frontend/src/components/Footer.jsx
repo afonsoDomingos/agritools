@@ -55,12 +55,82 @@ const Footer = () => {
           <div>
             <h4 style={{ marginBottom: '20px' }}>Siga-nos</h4>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <a href="#" className="glass" style={{ padding: '10px', borderRadius: '50%', color: 'white' }}><FacebookIcon /></a>
-              <a href="#" className="glass" style={{ padding: '10px', borderRadius: '50%', color: 'white' }}><InstagramIcon /></a>
-              <a href="#" className="glass" style={{ padding: '10px', borderRadius: '50%', color: 'white' }}><TwitterIcon /></a>
+              <a 
+                href="#" 
+                className="social-icon facebook" 
+                style={{ 
+                  width: '45px', 
+                  height: '45px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: 'white',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <FacebookIcon />
+              </a>
+              <a 
+                href="#" 
+                className="social-icon instagram" 
+                style={{ 
+                  width: '45px', 
+                  height: '45px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: 'white',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <InstagramIcon />
+              </a>
+              <a 
+                href="#" 
+                className="social-icon twitter" 
+                style={{ 
+                  width: '45px', 
+                  height: '45px', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: 'white',
+                  transition: 'all 0.3s ease',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <TwitterIcon />
+              </a>
             </div>
           </div>
         </div>
+        
+        <style>{`
+          .social-icon:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+          }
+          .social-icon.facebook:hover {
+            background-color: #1877F2 !important;
+            border-color: #1877F2 !important;
+          }
+          .social-icon.instagram:hover {
+            background-color: #E4405F !important;
+            border-color: #E4405F !important;
+          }
+          .social-icon.twitter:hover {
+            background-color: #1DA1F2 !important;
+            border-color: #1DA1F2 !important;
+          }
+        `}</style>
         
         <div style={{ marginTop: '60px', paddingTop: '20px', borderTop: '1px solid #333', textAlign: 'center', color: '#888', fontSize: '0.9rem' }}>
           <p>&copy; {new Date().getFullYear()} AgriTools. Todos os direitos reservados.</p>
