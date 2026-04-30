@@ -12,7 +12,7 @@ const Profile = () => {
     const fetchOrders = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const { data } = await axios.get('/api/orders/myorders', config);
+        const { data } = await axios.get('/_/backend/api/orders/myorders', config);
         setOrders(data);
         setLoading(false);
       } catch (error) {

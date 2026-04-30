@@ -12,7 +12,7 @@ const Shop = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`/api/products?keyword=${keyword}&category=${category}`);
+      const { data } = await axios.get(`/_/backend/api/products?keyword=${keyword}&category=${category}`);
       setProducts(data.products);
       setLoading(false);
     } catch (error) {

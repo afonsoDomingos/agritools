@@ -48,7 +48,7 @@ const Checkout = () => {
 
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      await axios.post('/api/orders', orderData, config);
+      await axios.post('/_/backend/api/orders', orderData, config);
       
       if (paymentMethod === 'WhatsApp') {
         const message = `Olá AgriTools! Fiz um novo pedido:\n\nItens:\n${cartItems.map(i => `- ${i.name} (${i.qty}x)`).join('\n')}\n\nTotal: ${totalPrice} MT\n\nEndereco: ${shippingData.address}, ${shippingData.city}`;

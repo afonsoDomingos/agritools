@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get('/api/products');
+      const { data } = await axios.get('/_/backend/api/products');
       setProducts(data.products);
       setLoading(false);
     } catch (error) {
@@ -41,7 +41,7 @@ const AdminDashboard = () => {
     if (window.confirm('Tem certeza que deseja excluir este produto?')) {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        await axios.delete(`/api/products/${id}`, config);
+        await axios.delete(`/_/backend/api/products/${id}`, config);
         fetchProducts();
       } catch (error) {
         alert('Erro ao excluir produto');
@@ -54,9 +54,9 @@ const AdminDashboard = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
       if (editingProduct) {
-        await axios.put(`/api/products/${editingProduct._id}`, formData, config);
+        await axios.put(`/_/backend/api/products/${editingProduct._id}`, formData, config);
       } else {
-        await axios.post('/api/products', formData, config);
+        await axios.post('/_/backend/api/products', formData, config);
       }
       setShowModal(false);
       setEditingProduct(null);
