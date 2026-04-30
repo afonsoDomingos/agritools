@@ -130,29 +130,6 @@ const Home = () => {
         </div>
         <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }}></div>
       </section>
-
-      {/* WhatsApp Float */}
-      <a
-        href="https://wa.me/258848318448"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-          backgroundColor: '#25D366',
-          color: 'white',
-          padding: '15px',
-          borderRadius: '50%',
-          boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <MessageSquare size={30} />
-      </a>
     </div>
   );
 };

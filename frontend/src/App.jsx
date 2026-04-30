@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
+import WhatsAppFloat from './components/WhatsAppFloat';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
 
@@ -34,6 +35,7 @@ function App() {
           )}
         </Routes>
       </main>
+      <WhatsAppFloat />
       <Footer />
     </Router>
   );

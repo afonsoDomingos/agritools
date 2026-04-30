@@ -1,12 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Plus, Edit, Trash, Package, ShoppingBag, Users, BarChart, X, Loader2, Star } from 'lucide-react';
+import { Plus, Edit, Trash, Package, ShoppingBag, Users, BarChart, X, Loader2, Star, TrendingUp } from 'lucide-react';
+import { BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [specialties, setSpecialties] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -30,6 +32,10 @@ const AdminDashboard = () => {
       } else if (activeTab === 'specialties') {
         const { data } = await axios.get('/_/backend/api/specialties');
         setSpecialties(data);
+      } else if (activeTab === 'orders') {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get('/_/backend/api/orders', config);
+        setOrders(data);
       }
       setLoading(false);
     } catch (error) {
@@ -101,6 +107,16 @@ const AdminDashboard = () => {
       resetForms();
     }
     setShowModal(true);
+  };
+
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      await axios.put(`/_/backend/api/orders/${orderId}/status`, { status }, config);
+      fetchData();
+    } catch (error) {
+      alert('Erro ao atualizar status do pedido');
+    }
   };
 
   return (
@@ -203,10 +219,108 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
               </div>
+            ) : activeTab === 'orders' ? (
+              <div className="glass" style={{ borderRadius: '20px', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ backgroundColor: '#f8f9fa' }}>
+                    <tr>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Data</th>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Cliente</th>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Total</th>
+                      <th style={{ padding: '15px', textAlign: 'left' }}>Status</th>
+                      <th style={{ padding: '15px', textAlign: 'center' }}>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map(o => (
+                      <tr key={o._id} style={{ borderTop: '1px solid #eee' }}>
+                        <td style={{ padding: '15px' }}>{new Date(o.createdAt).toLocaleDateString()}</td>
+                        <td style={{ padding: '15px', fontWeight: 600 }}>{o.user?.name || 'Cliente'}</td>
+                        <td style={{ padding: '15px' }}>{o.totalPrice.toLocaleString()} MT</td>
+                        <td style={{ padding: '15px' }}>
+                          <select 
+                            value={o.status} 
+                            onChange={(e) => updateOrderStatus(o._id, e.target.value)}
+                            style={{ padding: '5px 10px', borderRadius: '10px', border: '1px solid #ddd', fontSize: '0.8rem' }}
+                          >
+                            <option value="pending">Pendente</option>
+                            <option value="paid">Pago</option>
+                            <option value="shipped">Enviado</option>
+                            <option value="delivered">Entregue</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '15px', textAlign: 'center' }}>
+                          <button onClick={() => alert('Ver detalhes em desenvolvimento')} style={{ color: 'var(--primary)', background: 'none', fontWeight: 600 }}>Ver Itens</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : activeTab === 'reports' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                {/* Sales Chart */}
+                <div className="glass" style={{ padding: '30px', borderRadius: '20px', height: '400px' }}>
+                  <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <TrendingUp size={20} color="var(--primary)" /> Vendas por Dia
+                  </h3>
+                  <ResponsiveContainer width="100%" height="90%">
+                    <LineChart data={orders.map(o => ({ date: new Date(o.createdAt).toLocaleDateString(), total: o.totalPrice }))}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="total" stroke="var(--primary)" strokeWidth={3} dot={{ r: 6 }} activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Category Distribution */}
+                <div className="glass" style={{ padding: '30px', borderRadius: '20px', height: '400px' }}>
+                  <h3 style={{ marginBottom: '20px' }}>Distribuição de Produtos</h3>
+                  <ResponsiveContainer width="100%" height="90%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Sementes', value: products.filter(p => p.category === 'Sementes').length },
+                          { name: 'Máquinas', value: products.filter(p => p.category === 'Máquinas').length },
+                          { name: 'Ferramentas', value: products.filter(p => p.category === 'Ferramentas').length },
+                          { name: 'Avicultura', value: products.filter(p => p.category === 'Avicultura').length },
+                        ]}
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        <Cell fill="#10b981" />
+                        <Cell fill="#3b82f6" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#ef4444" />
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Users Growth (Mocked) */}
+                <div className="glass" style={{ padding: '30px', borderRadius: '20px', height: '400px', gridColumn: 'span 2' }}>
+                  <h3 style={{ marginBottom: '20px' }}>Crescimento de Utilizadores</h3>
+                  <ResponsiveContainer width="100%" height="90%">
+                    <ReBarChart data={[
+                      { name: 'Jan', users: 12 }, { name: 'Fev', users: 19 }, { name: 'Mar', users: 32 }, { name: 'Abr', users: 45 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="users" fill="var(--accent)" radius={[5, 5, 0, 0]} />
+                    </ReBarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             ) : (
               <div className="glass" style={{ padding: '50px', textAlign: 'center', borderRadius: '20px' }}>
-                <h3>Módulo em desenvolvimento</h3>
-                <p>O controle de pedidos e relatórios estará disponível em breve.</p>
+                <h3>Nenhum dado selecionado</h3>
               </div>
             )}
           </main>

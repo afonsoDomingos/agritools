@@ -100,6 +100,20 @@ const getOrders = async (req, res) => {
   res.json(orders);
 };
 
+// @desc Update order status
+// @route PUT /api/orders/:id/status
+const updateOrderStatus = async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    order.status = req.body.status || order.status;
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
 module.exports = {
   addOrderItems,
   getOrderById,
@@ -107,4 +121,5 @@ module.exports = {
   updateOrderToDelivered,
   getMyOrders,
   getOrders,
+  updateOrderStatus,
 };

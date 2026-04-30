@@ -8,12 +8,24 @@ const Shop = () => {
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('');
+  const [priceRange, setPriceRange] = useState(20000); // Default max price
+  const [debouncedKeyword, setDebouncedKeyword] = useState('');
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKeyword(keyword);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [keyword]);
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(`/_/backend/api/products?keyword=${keyword}&category=${category}`);
-      setProducts(data.products);
+      const { data } = await axios.get(`/_/backend/api/products?keyword=${debouncedKeyword}&category=${category}`);
+      // Filter by price client-side for simplicity, or we could add to backend
+      const filtered = data.products.filter(p => p.price <= priceRange);
+      setProducts(filtered);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -23,7 +35,7 @@ const Shop = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [category]);
+  }, [category, debouncedKeyword, priceRange]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -94,6 +106,25 @@ const Shop = () => {
                   </li>
                 ))}
               </ul>
+
+              <h3 style={{ margin: '30px 0 20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Filter size={20} /> Preço Máximo
+              </h3>
+              <div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="50000" 
+                  step="500"
+                  value={priceRange} 
+                  onChange={(e) => setPriceRange(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--primary)' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontWeight: 600 }}>
+                  <span>0 MT</span>
+                  <span style={{ color: 'var(--primary)' }}>{priceRange.toLocaleString()} MT</span>
+                </div>
+              </div>
             </div>
           </aside>
 

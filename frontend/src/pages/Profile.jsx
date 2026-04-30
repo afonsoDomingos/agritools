@@ -75,6 +75,31 @@ const Profile = () => {
                           {order.status.toUpperCase()}
                         </div>
                       </div>
+
+                      {/* Progress Bar */}
+                      <div style={{ marginBottom: '25px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '0.8rem', fontWeight: 600 }}>
+                          <span style={{ color: order.status === 'pending' ? 'var(--primary)' : '#ccc' }}>Pendente</span>
+                          <span style={{ color: order.status === 'paid' ? 'var(--primary)' : '#ccc' }}>Pago</span>
+                          <span style={{ color: order.status === 'shipped' ? 'var(--primary)' : '#ccc' }}>Enviado</span>
+                          <span style={{ color: order.status === 'delivered' ? 'var(--primary)' : '#ccc' }}>Entregue</span>
+                        </div>
+                        <div style={{ height: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px', position: 'relative' }}>
+                          <div style={{ 
+                            position: 'absolute', 
+                            left: 0, 
+                            top: 0, 
+                            height: '100%', 
+                            backgroundColor: 'var(--primary)', 
+                            borderRadius: '4px',
+                            transition: 'width 0.5s ease',
+                            width: order.status === 'pending' ? '12.5%' : 
+                                   order.status === 'paid' ? '37.5%' : 
+                                   order.status === 'shipped' ? '62.5%' : 
+                                   order.status === 'delivered' ? '100%' : '0%'
+                          }}></div>
+                        </div>
+                      </div>
                       
                       <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', overflowX: 'auto', paddingBottom: '10px' }}>
                         {order.orderItems.map((item, i) => (

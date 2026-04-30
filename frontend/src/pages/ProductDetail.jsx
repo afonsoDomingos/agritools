@@ -81,20 +81,41 @@ const ProductDetail = () => {
               {product.description}
             </p>
 
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '40px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f0f0f0', borderRadius: '10px', padding: '5px' }}>
-                <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ background: 'none', padding: '10px' }}>-</button>
-                <span style={{ width: '50px', textAlign: 'center', fontWeight: 700, fontSize: '1.2rem' }}>{qty}</span>
-                <button onClick={() => setQty(qty + 1)} style={{ background: 'none', padding: '10px' }}>+</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '40px' }}>
+              <div style={{ display: 'flex', gap: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f0f0f0', borderRadius: '10px', padding: '5px' }}>
+                  <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ background: 'none', padding: '10px' }}>-</button>
+                  <span style={{ width: '50px', textAlign: 'center', fontWeight: 700, fontSize: '1.2rem' }}>{qty}</span>
+                  <button onClick={() => setQty(qty + 1)} style={{ background: 'none', padding: '10px' }}>+</button>
+                </div>
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={product.stock === 0}
+                  className="btn btn-primary" 
+                  style={{ flexGrow: 1, justifyContent: 'center', padding: '15px', borderRadius: '10px', fontSize: '1.1rem' }}
+                >
+                  <ShoppingCart size={22} /> Adicionar ao Carrinho
+                </button>
               </div>
-              <button 
-                onClick={handleAddToCart}
-                disabled={product.stock === 0}
-                className="btn btn-primary" 
-                style={{ flexGrow: 1, justifyContent: 'center', padding: '15px', borderRadius: '10px', fontSize: '1.1rem' }}
+              <a 
+                href={`https://wa.me/258848318448?text=${encodeURIComponent(`Olá! Tenho interesse no produto: ${product.name} (Qtd: ${qty}). Preço: ${product.price} MT.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn" 
+                style={{ 
+                  backgroundColor: '#25D366', 
+                  color: 'white', 
+                  justifyContent: 'center', 
+                  padding: '15px', 
+                  borderRadius: '10px', 
+                  fontSize: '1.1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}
               >
-                <ShoppingCart size={22} /> Adicionar ao Carrinho
-              </button>
+                <MessageSquare size={22} /> Comprar via WhatsApp
+              </a>
             </div>
 
             {/* Features Info */}
